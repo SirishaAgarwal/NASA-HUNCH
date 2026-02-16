@@ -1,0 +1,159 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+
+  background:
+    radial-gradient(circle at 20% 40%, rgba(0,120,255,0.25), transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(255,0,60,0.25), transparent 40%),
+    url("images/space_bg.jpg");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+.card {
+  width: 340px;
+  padding: 40px;
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  box-shadow:
+    0 0 40px rgba(255, 255, 255, 0.08),
+    0 0 80px rgba(0, 150, 255, 0.15);
+
+  text-align: center;
+  color: white;
+}
+
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+
+  color: white;
+  outline: none;
+}
+
+input::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
+input:focus {
+  border-color: #00bfff;
+  box-shadow: 0 0 10px #00bfff;
+}
+
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+
+  background: linear-gradient(90deg, #0077ff, #00d4ff);
+  border: none;
+  border-radius: 8px;
+
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  box-shadow: 0 0 20px #00bfff;
+  transform: translateY(-2px);
+}
+
+
+button:hover {
+  background: #005fcc;
+}
+
+.switch {
+  margin-top: 10px;
+  font-size: 14px;
+}
+.switch a {
+  color: #9a7fe4;   
+  text-decoration: underline;
+  font-weight: 500;
+  transition: 0.3s ease;
+}
+
+.switch a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 8px #9a7fe4;
+}
+
+.hidden {
+  display: none;
+}
+
+.message {
+  margin-top: 10px;
+  font-size: 14px;
+  color: red;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background-image:
+    radial-gradient(white 1px, transparent 1px),
+    radial-gradient(white 1px, transparent 1px);
+
+  background-size: 120px 120px;
+  background-position: 0 0, 60px 60px;
+
+  opacity: 0.08;
+}
+
+.dob {
+  display: flex;
+  gap: 8px;
+}
+
+.dob select {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+select {
+  color: rgb(0, 0, 0);          
+  background-color: white; 
+  border: 1px solid white; 
+}
+
+select option {
+  color: rgb(0, 0, 0);         
+  background-color: white; 
+
+}

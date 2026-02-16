@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Medical Login System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="loginPage" class="card">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button onclick="handleLogin()">Login</button>
+
+    <p class="switch">
+      Don't have an account?
+      <a href="#" onclick="showSignup()">Sign up</a>
+    </p>
+
+    <p id="loginMessage" class="message"></p>
+  </div>
+
+  <div id="signupPage" class="card hidden">
+  <h2>Create Account</h2>
+
+  <input type="text" id="fullName" placeholder="Full Name">
+  <input type="email" id="signupEmail" placeholder="Email">
+  <input type="password" id="signupPassword" placeholder="Create Password">
+
+  <div class="dob">
+    <select id="month"></select>
+    <select id="day"></select>
+    <select id="year"></select>
+  </div>
+
+  <button onclick="handleSignup()">Sign Up</button>
+
+  <p class="switch">
+    Already have an account?
+    <a href="#" onclick="showLogin()">Login</a>
+  </p>
+
+  <p id="signupMessage" class="message"></p>
+</div>
+
+
+  <div id="dashboard" class="card hidden">
+    <h2>Dashboard</h2>
+    <p id="welcomeText"></p>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
