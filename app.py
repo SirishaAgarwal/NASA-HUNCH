@@ -168,6 +168,32 @@ def inventory():
 
     return render_template("inventory.html", inventory=Inventory.query.all())
 
+#----------------EDIT--------------#
+@app.route("/inventory/edit/<int:item_id>", methods=["GET", "POST"])
+@login_required
+def edit_item(item_id):
+    if current_user.role != "admin":
+        flash("Admin access required.")
+        return redirect(url_for("dashboard"))
+
+    item = Inventory.query.get_or_404(item_id)
+
+    if request.method == "POST":
+        item.item_name = request.form["item_name"]
+        item.quantity = int(request.form["quantity"])
+
+        exp_str = request.form.get("expiration_date")
+        if exp_str:
+            item.expiration_date = datetime.strptime(exp_str, "%Y-%m-%d").date()
+        else:
+            item.expiration_date = None
+
+        db.session.commit()
+        flash("Item updated successfully.")
+        return redirect(url_for("inventory"))
+
+    return render_template("edit_item.html", item=item)
+
 # ---------------- RUN ---------------- #
 if __name__ == "__main__":
     app.run(debug=True)
