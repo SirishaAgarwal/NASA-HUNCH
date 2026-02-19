@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f6f8; }
+        h1 { text-align: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background: #0078ff; color: white; }
+        form { margin-bottom: 20px; background: white; padding: 20px; border-radius: 10px; }
+        input, button { padding: 8px; margin: 5px; }
+        .top-nav { text-align: center; margin-bottom: 20px; }
+        a { text-decoration: none; font-weight: bold; color: #0078ff; margin: 0 10px; }
+    </style>
+</head>
+<body>
+
+<h1>🔧 Inventory Management</h1>
+
+<div class="top-nav">
+    <a href="/dashboard">🏠 Dashboard</a>
+    <a href="/logout">Logout</a>
+</div>
+
+<form method="POST">
+    <input type="text" name="item_name" placeholder="Item Name" required>
+    <input type="number" name="quantity" placeholder="Quantity" required>
+    <input type="date" name="expiration_date">
+    <button type="submit">Add Item</button>
+</form>
+
+<table>
+    <tr>
+        <th>Item Name</th>
+        <th>Quantity</th>
+        <th>Expiration Date</th>
+        <th>Checked Out</th>
+        <th>Actions</th>
+    </tr>
+    {% for item in inventory %}
+    <tr>
+        <td>{{ item.item_name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.expiration_date }}</td>
+        <td>{{ item.checked_out }}</td>
+        <td>
+            <form style="display:inline;" action="/inventory/checkout/{{ item.id }}" method="POST">
+                <button type="submit">Checkout</button>
+            </form>
+            <a href="/inventory/edit/{{ item.id }}">Edit</a>
+            <form style="display:inline;" action="/inventory/delete/{{ item.id }}" method="POST">
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
