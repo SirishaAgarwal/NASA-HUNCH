@@ -194,6 +194,44 @@ def edit_item(item_id):
 
     return render_template("edit_item.html", item=item)
 
+# ---------------- CHECKOUT ---------------- #
+@app.route("/inventory/checkout/<int:item_id>", methods=["POST"])
+@login_required
+def checkout_item(item_id):
+    if current_user.role != "admin":
+        flash("Admin access required.")
+        return redirect(url_for("dashboard"))
+
+    item = Inventory.query.get_or_404(item_id)
+
+    if item.quantity > 0:
+        item.quantity -= 1
+        item.checked_out += 1
+        item.last_checked_out = datetime.utcnow()
+        db.session.commit()
+        flash(f"Checked out 1 {item.item_name}")
+    else:
+        flash(f"No {item.item_name} left to check out")
+
+    return redirect(url_for("inventory"))
+
+
+# ---------------- DELETE ---------------- #
+@app.route("/inventory/delete/<int:item_id>", methods=["POST"])
+@login_required
+def delete_item(item_id):
+    if current_user.role != "admin":
+        flash("Admin access required.")
+        return redirect(url_for("dashboard"))
+
+    item = Inventory.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash(f"Deleted {item.item_name}")
+
+    return redirect(url_for("inventory"))
+
+
 # ---------------- RUN ---------------- #
 if __name__ == "__main__":
     app.run(debug=True)
