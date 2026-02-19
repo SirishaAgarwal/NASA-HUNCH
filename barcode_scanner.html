@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Medical Inventory Scanner</title>
+
+<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0b1c2d;
+    color: rgb(255, 255, 255);
+    text-align: center;
+    font-weight: bold;
+    padding: 20px;
+}
+
+#scanner {
+    width: 100%;
+    max-width: 500px;
+    height: 320px;
+    margin: 20px auto;
+    border: 3px solid #00bfff;
+    border-radius: 10px;
+}
+
+.box {
+    background: #122b44;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+input, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    border: none;
+}
+
+button {
+    padding: 10px 20px;
+    background: #00bfff;
+    color: black;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.label,
+#barcode,
+#medName,
+#dosage {
+    color: rgb(0, 0, 0);
+    font-weight: bold;
+}
+
+
+
+</style>
+</head>
+
+<body>
+
+<h1>Smart Medical Inventory System</h1>
+<p>Scan medication barcode</p>
+
+<div id="scanner"></div>
+
+<div class="box">
+    <p><span class="label">Barcode:</span> <span id="barcode">---</span></p>
+<p><span class="label">Medication:</span> <span id="medName">---</span></p>
+<p><span class="label">Dosage:</span> <span id="dosage">---</span></p>
+
+    <button onclick="resetScanner()">Scan Another Medication</button>
+</div>
+
+<div id="addBox" class="box" style="display:none;">
+    <h3>New Medication</h3>
+    <input id="newBarcode" placeholder="Barcode Number">
+    <input id="newName" placeholder="Medication Name">
+    <input id="newDose" placeholder="Dosage (ex: 200 mg)">
+    <br>
+    <button onclick="saveMedication()">Save Medication</button>
+</div>
+
+<script>
+let scanLocked = false;
+let database = JSON.parse(localStorage.getItem("medDB")) || {};
+
+function saveDatabase() {
+    localStorage.setItem("medDB", JSON.stringify(database));
+}
+
+Quagga.init({
+    inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: document.querySelector('#scanner'),
+        constraints: { facingMode: "environment" }
+    },
+    decoder: {
+        readers: ["ean_reader", "upc_reader", "code_128_reader"]
+    }
+}, function (err) {
+    if (err) return console.error(err);
+    Quagga.start();
+});
+
+let lastCode = "";
+
+Quagga.onDetected(function (data) {
+    if (scanLocked) return; 
+
+    let code = data.codeResult.code;
+
+  
+    if (code.length === 13 && code.startsWith("0")) {
+        code = code.substring(1);
+    }
+
+   
+    if (code === lastCode) return;
+    lastCode = code;
+
+    handleScan(code);
+});
+
+function handleScan(code) {
+    document.getElementById("barcode").textContent = code;
+
+    if (database[code]) {
+        scanLocked = true;
+        document.getElementById("medName").textContent = database[code].name;
+        document.getElementById("dosage").textContent = database[code].dosage;
+        document.getElementById("addBox").style.display = "none";
+    } else {
+        document.getElementById("medName").textContent = "Not Found";
+        document.getElementById("dosage").textContent = "---";
+
+        document.getElementById("newBarcode").value = code;
+        document.getElementById("addBox").style.display = "block";
+    }
+}
+
+function saveMedication() {
+    const code = document.getElementById("newBarcode").value;
+    const name = document.getElementById("newName").value;
+    const dose = document.getElementById("newDose").value;
+
+    if (!code || !name || !dose) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    database[code] = { name, dosage: dose };
+    saveDatabase();
+
+    document.getElementById("medName").textContent = name;
+    document.getElementById("dosage").textContent = dose;
+    document.getElementById("addBox").style.display = "none";
+
+    scanLocked = true; 
+    alert("Medication saved successfully!");
+}
+
+function resetScanner() {
+    scanLocked = false;
+    lastCode = "";
+    document.getElementById("barcode").textContent = "---";
+    document.getElementById("medName").textContent = "---";
+    document.getElementById("dosage").textContent = "---";
+    document.getElementById("addBox").style.display = "none";
+}
+</script>
+
+</body>
+</html>
