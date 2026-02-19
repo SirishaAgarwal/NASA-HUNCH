@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Medical Inventory Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div id="loginPage" class="card">
+  <h2>Login</h2>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <p class="message">{{ messages[0] }}</p>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST">
+    <input type="text" name="username" placeholder="Username / Crew ID" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+  </form>
+
+  <p class="switch">
+    Don't have an account?
+    <a href="#" onclick="showSignup()">Sign up</a>
+  </p>
+</div>
+
+
+<div id="signupPage" class="card hidden">
+  <h2>Create Account</h2>
+
+  <form method="POST" action="/signup">
+    <input type="text" name="username" placeholder="Create Username / Crew ID" required>
+    <input type="password" name="password" placeholder="Create Password" required>
+
+    <button type="submit">Sign Up</button>
+  </form>
+
+  <p class="switch">
+    Already have an account?
+    <a href="#" onclick="showLogin()">Login</a>
+  </p>
+</div>
+
+<script>
+  function showSignup() {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("signupPage").classList.remove("hidden");
+  }
+
+  function showLogin() {
+    document.getElementById("signupPage").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
+  }
+</script>
+
+</body>
+</html>
