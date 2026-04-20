@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Inventory Item</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0b132b;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: #1c2541;
+            padding: 30px;
+            border-radius: 14px;
+            width: 380px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: none;
+        }
+
+        button {
+            background: #00b4ff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        a {
+            color: #00b4ff;
+            text-decoration: none;
+            display: block;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Edit Item</h2>
+
+    <form method="POST">
+        <input type="text" name="item_name" value="{{ item.item_name }}" required>
+        <input type="number" name="quantity" value="{{ item.quantity }}" required>
+        <input type="date" name="expiration_date" value="{{ item.expiration_date }}">
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <a href="/inventory">← Back to Inventory</a>
+</div>
+
+</body>
+</html>
