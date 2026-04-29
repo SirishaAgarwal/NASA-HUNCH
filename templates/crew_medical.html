@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crew Medical Records</title>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #070B1A, #0E1B3D);
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 25px;
+        }
+
+        .top-nav {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .top-nav a {
+            text-decoration: none;
+            font-weight: 600;
+            color: #00d4ff;
+            margin: 0 15px;
+        }
+
+        .security-banner {
+            background: rgba(239, 71, 111, 0.15);
+            border: 1px solid rgba(239, 71, 111, 0.6);
+            color: #ffd6df;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        form {
+            background: rgba(255,255,255,0.06);
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        input, textarea {
+            padding: 10px;
+            margin: 6px;
+            border-radius: 8px;
+            border: none;
+            width: 220px;
+            font-family: inherit;
+        }
+
+        textarea {
+            height: 70px;
+            vertical-align: top;
+        }
+
+        button {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            background: linear-gradient(90deg, #0077ff, #00d4ff);
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.06);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #0077ff;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-top: 1px solid rgba(255,255,255,0.12);
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .empty {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Crew Medical Records</h1>
+<p class="subtitle">Protected prescription and medical profile access for authorized medical personnel</p>
+
+<div class="top-nav">
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('inventory') }}">General Inventory</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+</div>
+
+<div class="security-banner">
+    Medical Admin Access Only — contains protected crew health and prescription data.
+</div>
+
+<form method="POST">
+    <input type="text" name="crew_name" placeholder="Crew Member Name" required>
+    <input type="text" name="crew_id" placeholder="Crew ID" required>
+    <input type="text" name="allergies" placeholder="Allergies">
+    <input type="text" name="conditions" placeholder="Medical Conditions">
+    <input type="text" name="prescription" placeholder="Prescription">
+    <input type="text" name="dosage" placeholder="Dosage">
+    <input type="text" name="prescribing_doctor" placeholder="Prescribing Doctor">
+    <textarea name="notes" placeholder="Medical Notes"></textarea>
+
+    <br>
+    <button type="submit">Add Medical Record</button>
+</form>
+
+<table>
+    <tr>
+        <th>Crew Member</th>
+        <th>Crew ID</th>
+        <th>Allergies</th>
+        <th>Conditions</th>
+        <th>Prescription</th>
+        <th>Dosage</th>
+        <th>Doctor</th>
+        <th>Notes</th>
+    </tr>
+
+    {% for record in records %}
+    <tr>
+        <td>{{ record.crew_name }}</td>
+        <td>{{ record.crew_id }}</td>
+        <td>{{ record.allergies or "-" }}</td>
+        <td>{{ record.conditions or "-" }}</td>
+        <td>{{ record.prescription or "-" }}</td>
+        <td>{{ record.dosage or "-" }}</td>
+        <td>{{ record.prescribing_doctor or "-" }}</td>
+        <td>{{ record.notes or "-" }}</td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="8" class="empty">No crew medical records have been added yet.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

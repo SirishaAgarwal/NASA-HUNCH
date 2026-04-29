@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
-from models import db, User, Inventory
+from models import db, User, Inventory, CrewMedicalRecord
 from datetime import datetime, date
 import os
 
@@ -21,9 +21,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 # ---------------- DB INIT ---------------- #
 with app.app_context():
@@ -38,6 +40,17 @@ with app.app_context():
         )
         db.session.add(admin)
         db.session.commit()
+
+    if not User.query.filter_by(username="doctor").first():
+        pw_hash = bcrypt.generate_password_hash("doctor123").decode("utf-8")
+        doctor = User(
+            username="doctor",
+            password=pw_hash,
+            role="medical_admin"
+        )
+        db.session.add(doctor)
+        db.session.commit()
+
 
 # ---------------- LOGIN ---------------- #
 @app.route("/", methods=["GET", "POST"])
@@ -90,7 +103,6 @@ def signup():
     return redirect(url_for("login"))
 
 
-
 # ---------------- DASHBOARD ---------------- #
 @app.route("/dashboard")
 @login_required
@@ -99,7 +111,10 @@ def dashboard():
 
     total_kits = sum(item.quantity for item in items)
     low_stock = sum(1 for item in items if item.quantity <= 5)
-    expired = sum(1 for item in items if item.expiration_date and item.expiration_date < date.today())
+    expired = sum(
+        1 for item in items
+        if item.expiration_date and item.expiration_date < date.today()
+    )
     checked_out = sum(item.checked_out for item in items)
 
     today = date.today()
@@ -113,7 +128,6 @@ def dashboard():
 
     total_weekly_usage = sum(weekly_usage)
     avg_daily_usage = total_weekly_usage / 7 if total_weekly_usage else 0.5
-
     days_until_depletion = int(total_kits / avg_daily_usage) if avg_daily_usage else 180
 
     if days_until_depletion > 60:
@@ -136,6 +150,7 @@ def dashboard():
         risk=risk
     )
 
+
 # ---------------- LOGOUT ---------------- #
 @app.route("/logout")
 @login_required
@@ -143,14 +158,18 @@ def logout():
     logout_user()
     return redirect(url_for("login"))
 
+
 # ---------------- INVENTORY ---------------- #
 @app.route("/inventory", methods=["GET", "POST"])
 @login_required
 def inventory():
-    if current_user.role != "admin":
-        return "Access denied"
+    # Everyone can VIEW inventory
 
     if request.method == "POST":
+        if current_user.role not in ["admin", "medical_admin"]:
+            flash("Only admins can add inventory items.")
+            return redirect(url_for("inventory"))
+
         exp_date = None
         exp_str = request.form.get("expiration_date")
 
@@ -165,14 +184,16 @@ def inventory():
 
         db.session.add(item)
         db.session.commit()
+        flash("Inventory item added.")
 
     return render_template("inventory.html", inventory=Inventory.query.all())
 
-#----------------EDIT--------------#
+
+# ---------------- EDIT INVENTORY ITEM ---------------- #
 @app.route("/inventory/edit/<int:item_id>", methods=["GET", "POST"])
 @login_required
 def edit_item(item_id):
-    if current_user.role != "admin":
+    if current_user.role not in ["admin", "medical_admin"]:
         flash("Admin access required.")
         return redirect(url_for("dashboard"))
 
@@ -194,14 +215,11 @@ def edit_item(item_id):
 
     return render_template("edit_item.html", item=item)
 
-# ---------------- CHECKOUT ---------------- #
+
+# ✅ FIXED: CREW CAN CHECK OUT ITEMS NOW
 @app.route("/inventory/checkout/<int:item_id>", methods=["POST"])
 @login_required
 def checkout_item(item_id):
-    if current_user.role != "admin":
-        flash("Admin access required.")
-        return redirect(url_for("dashboard"))
-
     item = Inventory.query.get_or_404(item_id)
 
     if item.quantity > 0:
@@ -216,11 +234,11 @@ def checkout_item(item_id):
     return redirect(url_for("inventory"))
 
 
-# ---------------- DELETE ---------------- #
+# ---------------- DELETE INVENTORY ITEM ---------------- #
 @app.route("/inventory/delete/<int:item_id>", methods=["POST"])
 @login_required
 def delete_item(item_id):
-    if current_user.role != "admin":
+    if current_user.role not in ["admin", "medical_admin"]:
         flash("Admin access required.")
         return redirect(url_for("dashboard"))
 
@@ -232,7 +250,35 @@ def delete_item(item_id):
     return redirect(url_for("inventory"))
 
 
+# ---------------- CREW MEDICAL RECORDS ---------------- #
+@app.route("/crew-medical", methods=["GET", "POST"])
+@login_required
+def crew_medical():
+    if current_user.role != "medical_admin":
+        flash("Medical admin access required.")
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        record = CrewMedicalRecord(
+            crew_name=request.form["crew_name"],
+            crew_id=request.form["crew_id"],
+            allergies=request.form.get("allergies"),
+            conditions=request.form.get("conditions"),
+            prescription=request.form.get("prescription"),
+            dosage=request.form.get("dosage"),
+            prescribing_doctor=request.form.get("prescribing_doctor"),
+            notes=request.form.get("notes")
+        )
+
+        db.session.add(record)
+        db.session.commit()
+        flash("Crew medical record added.")
+        return redirect(url_for("crew_medical"))
+
+    records = CrewMedicalRecord.query.all()
+    return render_template("crew_medical.html", records=records)
+
+
 # ---------------- RUN ---------------- #
 if __name__ == "__main__":
     app.run(debug=True)
-
