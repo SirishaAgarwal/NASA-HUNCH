@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NASA HUNCH | Medical Inventory Dashboard</title>
+
+  <!-- Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+  <style>
+    :root{
+      --bg1:#070B1A;
+      --bg2:#0E1B3D;
+      --card:#0f2147;
+      --card2:#132b5e;
+      --text:#EAF2FF;
+      --muted: rgba(234,242,255,.75);
+
+      --cyan:#00D4FF;
+      --blue:#0077FF;
+      --green:#00FF9C;
+      --yellow:#FFD166;
+      --red:#EF476F;
+
+      --stroke: rgba(255,255,255,.14);
+      --shadow: 0 14px 30px rgba(0,0,0,.35);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      padding:22px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 30%, rgba(0,212,255,.18), transparent 42%),
+        radial-gradient(circle at 85% 60%, rgba(239,71,111,.16), transparent 40%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 18px;
+      border:1px solid var(--stroke);
+      background: rgba(15,33,71,.75);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom:16px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .brand h1{
+      font-size:18px;
+      margin:0;
+      letter-spacing:.2px;
+    }
+    .brand .sub{
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .pill{
+      padding:8px 12px;
+      border-radius: 999px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    .btn{
+      padding:10px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(0,212,255,.35);
+      background: linear-gradient(135deg, rgba(0,119,255,.9), rgba(0,212,255,.85));
+      color:#00111a;
+      font-weight:800;
+      text-decoration:none;
+      box-shadow: 0 10px 20px rgba(0,212,255,.18);
+    }
+    .btn:hover{ filter: brightness(1.05); }
+
+    .btn.secondary{
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border:1px solid var(--stroke);
+      box-shadow:none;
+      font-weight:700;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:14px;
+    }
+
+    .card{
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(19,43,94,.92), rgba(15,33,71,.92));
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding:16px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card h3{
+      margin:0 0 10px 0;
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .kpi{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .kpi .value{
+      font-size:34px;
+      font-weight:900;
+      line-height:1;
+    }
+
+    .kpi .tag{
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    .accent-bar{
+      position:absolute;
+      left:0; top:0; bottom:0;
+      width:6px;
+      opacity:.95;
+    }
+    .accent-green{ background: var(--green); }
+    .accent-yellow{ background: var(--yellow); }
+    .accent-red{ background: var(--red); }
+    .accent-cyan{ background: var(--cyan); }
+
+    .span-3{ grid-column: span 3; }
+    .span-4{ grid-column: span 4; }
+    .span-5{ grid-column: span 5; }
+    .span-6{ grid-column: span 6; }
+    .span-7{ grid-column: span 7; }
+    .span-8{ grid-column: span 8; }
+    .span-12{ grid-column: span 12; }
+
+    .two-col{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:10px;
+    }
+
+    ul{
+      margin:0;
+      padding-left: 18px;
+      color: var(--text);
+    }
+    li{ margin:6px 0; color: var(--muted); }
+    li strong{ color: var(--text); }
+
+    .risk-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-weight:900;
+      letter-spacing:.3px;
+      padding:8px 12px;
+      border-radius: 999px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+    }
+    .dot{
+      width:10px; height:10px; border-radius:999px;
+      display:inline-block;
+    }
+    .dot.green{ background: var(--green); }
+    .dot.yellow{ background: var(--yellow); }
+    .dot.red{ background: var(--red); }
+
+    /* Calendar styling */
+    .calendar-wrap{
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--stroke);
+      border-radius: 14px;
+      padding:10px;
+    }
+    #calendar{
+      background: rgba(255,255,255,.96);
+      border-radius: 12px;
+      padding:8px;
+      color:#061027;
+    }
+
+    /* Make calendar smaller */
+    .fc .fc-toolbar-title{
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .fc .fc-button{
+      padding: .25rem .5rem;
+      font-size: 12px;
+    }
+    .fc .fc-daygrid-day-number{
+      font-size: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px){
+      .span-3, .span-4, .span-5, .span-6, .span-7, .span-8 { grid-column: span 12; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <div class="brand">
+      <h1>NASA HUNCH | Medical Inventory System</h1>
+      <div class="sub">Mission dashboard • inventory readiness • predictive supply forecasting</div>
+    </div>
+
+    <div class="actions">
+      <span class="pill">Logged in as: <strong>{{ current_user.username }}</strong></span>
+      <a class="btn secondary" href="/inventory">Inventory</a>
+      <a class="btn" href="/medical" style="background: linear-gradient(135deg, rgba(123,47,255,.9), rgba(0,212,255,.85)); border-color: rgba(123,47,255,.5);">🧬 Access Personal Medical Page</a>
+      <a class="btn" href="/logout">Logout</a>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- KPIs -->
+    <div class="card span-3">
+      <div class="accent-bar accent-cyan"></div>
+      <h3>Total Supplies</h3>
+      <div class="kpi">
+        <div class="value">{{ total_kits }}</div>
+        <div class="tag">units in stock</div>
+      </div>
+    </div>
+
+    <div class="card span-3">
+      <div class="accent-bar accent-yellow"></div>
+      <h3>Low Stock Items</h3>
+      <div class="kpi">
+        <div class="value">{{ low_stock }}</div>
+        <div class="tag">≤ 5 units</div>
+      </div>
+    </div>
+
+    <div class="card span-3">
+      <div class="accent-bar accent-red"></div>
+      <h3>Expired Items</h3>
+      <div class="kpi">
+        <div class="value">{{ expired }}</div>
+        <div class="tag">past date</div>
+      </div>
+    </div>
+
+    <div class="card span-3">
+      <div class="accent-bar accent-green"></div>
+      <h3>Checked Out</h3>
+      <div class="kpi">
+        <div class="value">{{ checked_out }}</div>
+        <div class="tag">total usages</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="card span-6">
+      <div class="accent-bar accent-cyan"></div>
+      <h3>Weekly Medical Usage</h3>
+      <canvas id="usageChart" height="120"></canvas>
+    </div>
+
+    <div class="card span-6">
+      <div class="accent-bar
+        {% if risk == 'NOMINAL' %}accent-green
+        {% elif risk == 'CAUTION' %}accent-yellow
+        {% else %}accent-red
+        {% endif %}"></div>
+
+      <h3>Predictive Supply Forecast</h3>
+
+      <div class="two-col">
+        <div>
+          <div class="risk-badge">
+            {% if risk == 'NOMINAL' %}
+              <span class="dot green"></span>
+            {% elif risk == 'CAUTION' %}
+              <span class="dot yellow"></span>
+            {% else %}
+              <span class="dot red"></span>
+            {% endif %}
+            <span>{{ risk }}</span>
+          </div>
+          <div style="margin-top:10px; color:var(--muted); font-size:12px;">
+            Days until depletion (estimated)
+          </div>
+          <div style="font-size:34px; font-weight:900; margin-top:6px;">
+            {{ days_until_depletion }}
+          </div>
+        </div>
+
+        <div style="color:var(--muted); font-size:12px; line-height:1.5;">
+          Forecast uses weekly checkout activity to estimate burn rate.
+          Improve accuracy by checking out items consistently (Inventory → Checkout).
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <canvas id="forecastChart" height="120"></canvas>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="card span-7">
+      <div class="accent-bar accent-red"></div>
+      <h3>Critical Alerts</h3>
+      <ul>
+        {% set found = false %}
+        {% for item in inventory %}
+          {% if item.quantity <= 5 %}
+            {% set found = true %}
+            <li><strong>Low stock:</strong> {{ item.item_name }} ({{ item.quantity }})</li>
+          {% endif %}
+          {% if item.expiration_date and item.expiration_date <= current_date %}
+            {% set found = true %}
+            <li><strong>Expired/expiring:</strong> {{ item.item_name }} ({{ item.expiration_date }})</li>
+          {% endif %}
+        {% endfor %}
+
+        {% if not found %}
+          <li><strong>All clear:</strong> no critical alerts right now.</li>
+        {% endif %}
+      </ul>
+    </div>
+
+    <!-- Calendar (smaller + better) -->
+    <div class="card span-5">
+      <div class="accent-bar accent-cyan"></div>
+      <h3>Mission Operations Calendar</h3>
+      <div class="calendar-wrap">
+        <div id="calendar"></div>
+      </div>
+      <div style="margin-top:8px; color:var(--muted); font-size:12px;">
+        Click & drag to select a date → add an event. Click an event → delete.
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Weekly usage (safe JSON)
+    const weeklyUsage = JSON.parse('{{ weekly_usage | tojson | safe }}');
+
+    // Usage chart
+    new Chart(document.getElementById('usageChart'), {
+      type: 'line',
+      data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets: [{
+          data: weeklyUsage,
+          borderWidth: 3,
+          tension: 0.35,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0 } }
+        }
+      }
+    });
+
+    // Forecast chart
+    const depletionDays = Number("{{ days_until_depletion }}");
+    const safeDays = (Number.isFinite(depletionDays) && depletionDays > 0) ? depletionDays : 1;
+
+    const labels = [];
+    const values = [];
+
+    // show a curve up to 120 days (or depletion)
+    const maxHorizon = Math.min(safeDays, 120);
+    for (let d = 0; d <= maxHorizon; d += 10) {
+      labels.push(d);
+      values.push(Math.max(0, 100 - (d / safeDays) * 100));
+    }
+
+    new Chart(document.getElementById('forecastChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          borderWidth: 3,
+          tension: 0.35,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+        }
+      }
+    });
+
+    // Calendar (smaller height)
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        height: 360,          
+        contentHeight: 320,
+        selectable: true,
+        editable: true,
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek'
+        },
+        select: function(info) {
+          const title = prompt('Event title:');
+          if (title) {
+            calendar.addEvent({
+              title: title,
+              start: info.startStr,
+              end: info.endStr,
+              allDay: true
+            });
+          }
+          calendar.unselect();
+        },
+        eventClick: function(info) {
+          if (confirm('Delete this event?')) {
+            info.event.remove();
+          }
+        }
+      });
+
+      calendar.render();
+    });
+  </script>
+
+</body>
+</html>

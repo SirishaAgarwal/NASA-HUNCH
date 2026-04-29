@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Marcus Cole | Personal Medical Records</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(circle at 15% 30%, rgba(0,80,40,0.25), transparent 45%),
+        radial-gradient(circle at 85% 70%, rgba(0,40,80,0.3), transparent 45%),
+        #04091a;
+      color: white;
+      padding: 30px;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(white 1px, transparent 1px),
+        radial-gradient(white 1px, transparent 1px);
+      background-size: 120px 120px;
+      background-position: 0 0, 60px 60px;
+      opacity: 0.07;
+      z-index: 0;
+    }
+
+    .page { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 18px; }
+
+    .avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #006633, #00cc66);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+
+    .name { font-size: 22px; font-weight: 800; }
+    .meta { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 3px; }
+
+    .back-btn {
+      padding: 9px 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.12); color: white; }
+
+    .scan-btn {
+      padding: 9px 18px;
+      background: linear-gradient(90deg, #0055cc, #00bfff);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .scan-btn:hover { filter: brightness(1.1); box-shadow: 0 0 14px rgba(0,191,255,0.4); }
+
+    .header-btns { display: flex; gap: 10px; align-items: center; }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 14px;
+    }
+
+    .needs {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .needs strong { color: #00cc66; }
+
+    .med-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .med-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 20px;
+      border-left: 4px solid #00cc66;
+      transition: 0.2s;
+    }
+
+    .med-card:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.2);
+      border-left-color: #00cc66;
+    }
+
+    .med-name { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: white; }
+
+    .med-row {
+      display: flex;
+      gap: 6px;
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.5;
+    }
+
+    .med-row .label {
+      color: rgba(255,255,255,0.35);
+      min-width: 60px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      padding-top: 1px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="avatar"><!--🔧--></div>
+      <div>
+        <div class="name">Flight Engineer Marcus "Vector" Cole</div>
+        <div class="meta">Age: 38 &nbsp;•&nbsp; Systems & Robotics Specialist</div>
+      </div>
+    </div>
+    <div class="header-btns">
+      <a href="/barcode_scanner" class="scan-btn"> Scan Medication Barcode</a>
+      <a href="/medical" class="back-btn">← Back</a>
+      <!--💊-->
+    </div>
+  </div>
+
+  <div class="needs">
+    <strong>Common Health Needs:</strong> Cold symptoms, sleep regulation, mild anxiety, indigestion, skin irritation
+  </div>
+
+  <div class="section-title">Personal Medication Inventory</div>
+
+  <div class="med-grid">
+
+    <div class="med-card">
+      <div class="med-name">1. Tylenol Extra Strength (Acetaminophen 500 mg)</div>
+      <div class="med-row"><span class="label">Example</span> 500 mg caplets, 100-count bottle</div>
+      <div class="med-row"><span class="label">Dosage</span> 500–1,000 mg every 6 hours (max 3,000 mg/day)</div>
+      <div class="med-row"><span class="label">Use</span> Fever and pain relief</div>
+    </div>
+
+    <div class="med-card">
+      <div class="med-name">2. ZzzQuil (Diphenhydramine 25 mg)</div>
+      <div class="med-row"><span class="label">Example</span> Liquid 12 fl oz bottle (25 mg per 30 mL)</div>
+      <div class="med-row"><span class="label">Dosage</span> 25–50 mg at bedtime</div>
+      <div class="med-row"><span class="label">Use</span> Occasional sleeplessness</div>
+    </div>
+
+    <div class="med-card">
+      <div class="med-name">3. Pepto-Bismol (Bismuth Subsalicylate 262 mg)</div>
+      <div class="med-row"><span class="label">Example</span> 8 fl oz liquid bottle</div>
+      <div class="med-row"><span class="label">Dosage</span> 30 mL every 30–60 minutes as needed (max 8 doses/day)</div>
+      <div class="med-row"><span class="label">Use</span> Upset stomach, nausea, diarrhea</div>
+    </div>
+
+    <div class="med-card">
+      <div class="med-name">4. Hydrocortisone Cream 1% (Cortizone-10)</div>
+      <div class="med-row"><span class="label">Example</span> 1 oz tube</div>
+      <div class="med-row"><span class="label">Dosage</span> Apply thin layer 1–3 times daily</div>
+      <div class="med-row"><span class="label">Use</span> Minor skin irritation, itching, rashes</div>
+    </div>
+
+    <div class="med-card">
+      <div class="med-name">5. Emergen-C (Vitamin C 1,000 mg packets)</div>
+      <div class="med-row"><span class="label">Example</span> 30-packet box</div>
+      <div class="med-row"><span class="label">Dosage</span> 1 packet dissolved in water daily</div>
+      <div class="med-row"><span class="label">Use</span> Dietary vitamin C supplement for immune support</div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

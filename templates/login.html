@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Medical Inventory Login</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(circle at 20% 40%, rgba(0,120,255,0.25), transparent 40%),
+        radial-gradient(circle at 80% 60%, rgba(255,0,60,0.25), transparent 40%),
+        #060c18;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(white 1px, transparent 1px),
+        radial-gradient(white 1px, transparent 1px);
+      background-size: 120px 120px;
+      background-position: 0 0, 60px 60px;
+      opacity: 0.08;
+    }
+
+    .card {
+      width: 340px;
+      padding: 40px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow:
+        0 0 40px rgba(255,255,255,0.08),
+        0 0 80px rgba(0,150,255,0.15);
+      text-align: center;
+      color: white;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card h2 { margin: 0 0 4px; font-size: 22px; }
+
+    .tagline {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .hidden { display: none; }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      color: white;
+      outline: none;
+      font-size: 14px;
+    }
+
+    input[type="text"]::placeholder,
+    input[type="password"]::placeholder { color: rgba(255,255,255,0.5); }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #00bfff;
+      box-shadow: 0 0 10px rgba(0,191,255,0.4);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 14px;
+      background: linear-gradient(90deg, #0077ff, #00d4ff);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      box-shadow: 0 0 20px rgba(0,191,255,0.5);
+      transform: translateY(-2px);
+    }
+
+    .switch {
+      margin-top: 14px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .switch a {
+      color: #9a7fe4;
+      text-decoration: underline;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .switch a:hover { color: #fff; text-shadow: 0 0 8px #9a7fe4; }
+
+    .message {
+      margin-top: 10px;
+      font-size: 13px;
+      min-height: 16px;
+      color: #ff6b6b;
+    }
+
+    .flash {
+      background: rgba(0,191,255,0.1);
+      border: 1px solid rgba(0,191,255,0.3);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #00d4ff;
+      margin-bottom: 14px;
+    }
+
+    /* DOB */
+    .section-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: left;
+      margin: 12px 0 4px;
+    }
+
+    .dob { display: flex; gap: 8px; margin-bottom: 4px; }
+
+    .dob select {
+      flex: 1;
+      padding: 10px 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .dob select:focus { border-color: #00bfff; }
+    .dob select option { background: #0d1b2e; color: white; }
+
+    /* Role selector */
+    .role-selector { display: flex; gap: 10px; margin-top: 6px; }
+
+    .role-option { flex: 1; }
+    .role-option input[type="radio"] { display: none; }
+
+    .role-option label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 12px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: 0.25s;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.55);
+      width: 100%;
+    }
+
+    .role-option label .icon { font-size: 22px; }
+
+    .role-option input[type="radio"]:checked + label {
+      border-color: #00bfff;
+      background: rgba(0,191,255,0.13);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(0,191,255,0.2);
+    }
+
+    .role-option label:hover {
+      border-color: rgba(0,191,255,0.45);
+      color: rgba(255,255,255,0.85);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginPage" class="card">
+    <h2>Medical Portal</h2>
+     <!--🏥-->
+    <div class="tagline">Crew Access System</div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="flash">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/">
+      <input type="text" name="username" placeholder="Username / Crew ID" required autocomplete="username">
+      <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
+      <button type="submit">Login</button>
+    </form>
+
+    <p class="switch">
+      Don't have an account? <a onclick="showSignup()">Sign up</a>
+    </p>
+    <p id="loginMessage" class="message"></p>
+  </div>
+
+  <!-- SIGNUP -->
+  <div id="signupPage" class="card hidden">
+    <h2>Create Account</h2>
+    <!--🏥-->
+    <div class="tagline">New Crew Member</div>
+
+    <form method="POST" action="/signup" onsubmit="return validateSignup()">
+      <input type="text" name="username" id="signupUsername" placeholder="Username / Crew ID" required>
+      <input type="password" name="password" id="signupPassword" placeholder="Create Password" required>
+
+      <div class="section-label">Date of Birth</div>
+      <div class="dob">
+        <select id="month"><option value="">Month</option></select>
+        <select id="day"><option value="">Day</option></select>
+        <select id="year"><option value="">Year</option></select>
+      </div>
+
+      <div class="section-label">Account Type</div>
+      <div class="role-selector">
+        <div class="role-option">
+          <input type="radio" name="role" id="roleCrew" value="crew" checked>
+          <label for="roleCrew">
+            <span class="icon"></span>
+            Crew
+            <!--👨‍🚀-->
+          </label>
+        </div>
+        <div class="role-option">
+          <input type="radio" name="role" id="roleAdmin" value="admin">
+          <label for="roleAdmin">
+            <span class="icon"></span>
+            <!--🛡️-->
+            Admin
+          </label>
+        </div>
+      </div>
+
+      <button type="submit">Create Account</button>
+    </form>
+
+    <p class="switch">
+      Already have an account? <a onclick="showLogin()">Login</a>
+    </p>
+    <p id="signupMessage" class="message"></p>
+  </div>
+
+<script>
+  function showSignup() {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("signupPage").classList.remove("hidden");
+  }
+
+  function showLogin() {
+    document.getElementById("signupPage").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
+  }
+
+  function validateSignup() {
+    const username = document.getElementById("signupUsername").value.trim();
+    const password = document.getElementById("signupPassword").value.trim();
+    const month    = document.getElementById("month").value;
+    const day      = document.getElementById("day").value;
+    const year     = document.getElementById("year").value;
+    const msg      = document.getElementById("signupMessage");
+
+    if (!username || !password || !month || !day || !year) {
+      msg.textContent = "Please fill in all fields.";
+      return false;
+    }
+
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+
+    if (age < 18) {
+      msg.textContent = "You must be 18 or older to sign up.";
+      return false;
+    }
+
+    return true;
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const monthEl = document.getElementById("month");
+    const dayEl   = document.getElementById("day");
+    const yearEl  = document.getElementById("year");
+
+    ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+      .forEach((m, i) => monthEl.appendChild(new Option(m, i + 1)));
+
+    for (let i = 1; i <= 31; i++) dayEl.appendChild(new Option(i, i));
+
+    const cy = new Date().getFullYear();
+    for (let i = cy; i >= 1900; i--) yearEl.appendChild(new Option(i, i));
+  });
+</script>
+
+</body>
+</html>

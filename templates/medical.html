@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Face Scanner</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(circle at 20% 40%, rgba(0,60,180,0.3), transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(0,20,80,0.4), transparent 50%),
+        #04091a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(white 1px, transparent 1px),
+        radial-gradient(white 1px, transparent 1px);
+      background-size: 120px 120px;
+      background-position: 0 0, 60px 60px;
+      opacity: 0.1;
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    h1 {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: white;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: -16px;
+    }
+
+    .input-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 320px;
+    }
+
+    .input-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+      outline: none;
+      text-align: center;
+      letter-spacing: 1px;
+      transition: 0.2s;
+    }
+
+    input[type="text"]::placeholder { color: rgba(255,255,255,0.25); }
+
+    input[type="text"]:focus {
+      border-color: #00bfff;
+      box-shadow: 0 0 16px rgba(0,191,255,0.25);
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(90deg, #0055cc, #00bfff);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      box-shadow: 0 0 20px rgba(0,191,255,0.4);
+      transform: translateY(-2px);
+    }
+
+    .error { color: #ff6b6b; font-size: 13px; min-height: 18px; }
+
+    /* Modal overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: #0e1b3d;
+      border: 1px solid rgba(239,71,111,0.5);
+      border-radius: 16px;
+      padding: 36px 32px;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(239,71,111,0.3);
+    }
+
+    .modal h2 {
+      font-size: 20px;
+      color: #EF476F;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    .modal p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .modal button {
+      background: linear-gradient(90deg, #EF476F, #ff8fa3);
+      font-size: 14px;
+      padding: 11px;
+    }
+
+    .back-btn {
+      position: fixed;
+      top: 24px; left: 24px;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      text-decoration: none;
+      transition: 0.2s;
+      z-index: 10;
+    }
+
+    .back-btn:hover { background: rgba(255,255,255,0.12); color: white; }
+  </style>
+</head>
+<body>
+
+  <a href="/dashboard" class="back-btn">← Dashboard</a>
+
+  <div class="content">
+    <div>
+      <h1>[ FACE SCANNER ]</h1>
+      <div class="subtitle">Personal Medical Access Portal</div>
+    </div>
+
+    <div class="input-wrap">
+      <div class="input-label">Enter Name to Identify</div>
+      <input type="text" id="nameInput" placeholder="Enter name" autocomplete="off">
+      <button onclick="scanFace()">Scan &amp; Access Records</button>
+      <div class="error" id="errorMsg"></div>
+    </div>
+  </div>
+
+  <!-- Mismatch Modal -->
+  <div class="modal-overlay" id="mismatchModal">
+    <div class="modal">
+      <h2>⚠ Identity Mismatch</h2>
+      <p>The name entered does not match your logged-in account.<br>You will be logged out for security.</p>
+      <button onclick="forceLogout()">Log Out Now</button>
+    </div>
+  </div>
+
+  <script>
+    const profiles = {
+      "elena":  "/medical/elena",
+      "marcus": "/medical/marcus",
+      "aisha":  "/medical/aisha"
+    };
+
+    // Injected by Flask — the first name of the currently logged-in user (lowercased)
+    const loggedInFirstName = "{{ current_user.username | lower }}".split(/[\s_\-\.]/)[0];
+
+    function scanFace() {
+      const input = document.getElementById("nameInput").value.trim().toLowerCase();
+      const err   = document.getElementById("errorMsg");
+
+      if (!input) { err.textContent = "Please enter a name."; return; }
+
+      // Check if entered first name matches logged-in user's first name
+      if (input !== loggedInFirstName) {
+        document.getElementById("mismatchModal").classList.add("active");
+        return;
+      }
+
+      if (profiles[input]) {
+        window.location.href = profiles[input];
+      } else {
+        err.textContent = "Identity not found in medical database.";
+      }
+    }
+
+    function forceLogout() {
+      window.location.href = "/logout";
+    }
+
+    document.getElementById("nameInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") scanFace();
+    });
+  </script>
+</body>
+</html>

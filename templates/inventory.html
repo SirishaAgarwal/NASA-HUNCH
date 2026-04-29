@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Management</title>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #0b132b, #1c2541);
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .top-nav {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .top-nav a {
+            text-decoration: none;
+            font-weight: 600;
+            color: #00d4ff;
+            margin: 0 15px;
+        }
+
+        form.add-form {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        input {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+            border: none;
+        }
+
+        button {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .add-btn {
+            background: linear-gradient(90deg, #0077ff, #00d4ff);
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #0077ff;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .actions form {
+            display: inline;
+        }
+
+        .checkout-btn {
+            background: #00ff9c;
+            color: black;
+        }
+
+        .edit-link {
+            color: #ffd166;
+            margin: 0 8px;
+            font-weight: bold;
+        }
+
+        .delete-btn {
+            background: #ef476f;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<h1> Inventory Management</h1>
+
+<div class="top-nav">
+    <a href="{{ url_for('dashboard') }}"> Dashboard</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+</div>
+
+<form method="POST" action="{{ url_for('inventory') }}" class="add-form">
+    <input type="text" name="item_name" placeholder="Item Name" required>
+    <input type="number" name="quantity" placeholder="Quantity" required>
+    <input type="date" name="expiration_date">
+    <button type="submit" class="add-btn">Add Item</button>
+</form>
+
+<table>
+    <tr>
+        <th>Item Name</th>
+        <th>Quantity</th>
+        <th>Expiration Date</th>
+        <th>Checked Out</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for item in inventory %}
+    <tr>
+        <td>{{ item.item_name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.expiration_date if item.expiration_date else "-" }}</td>
+        <td>{{ item.checked_out }}</td>
+        <td class="actions">
+
+            <!-- CHECKOUT -->
+            <form action="{{ url_for('checkout_item', item_id=item.id) }}" method="POST">
+                <button type="submit" class="checkout-btn">Checkout</button>
+            </form>
+
+            <!-- EDIT -->
+            <a href="{{ url_for('edit_item', item_id=item.id) }}" class="edit-link">Edit</a>
+
+            <!-- DELETE -->
+            <form action="{{ url_for('delete_item', item_id=item.id) }}" method="POST">
+                <button type="submit"
+                        class="delete-btn"
+                        onclick="return confirm('Delete this item?')">
+                    Delete
+                </button>
+            </form>
+
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
+

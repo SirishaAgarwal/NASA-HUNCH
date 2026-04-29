@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Medical Inventory Scanner</title>
+
+<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0b1c2d;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    min-height: 100vh;
+    margin: 0;
+}
+
+h1 {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.back-btn {
+    display: inline-block;
+    margin-bottom: 16px;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    text-decoration: none;
+    transition: 0.2s;
+}
+.back-btn:hover { background: rgba(255,255,255,0.12); color: white; }
+
+#scanner {
+    width: 100%;
+    max-width: 500px;
+    height: 300px;
+    margin: 0 auto 16px auto;
+    border: 3px solid #00bfff;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* scan line animation */
+/*
+#scanner::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    height: 3px;
+    background: rgba(0,191,255,0.7);
+    animation: scanline 2s linear infinite;
+    z-index: 10;
+}
+
+@keyframes scanline {
+    0%   { top: 10%; }
+    100% { top: 90%; }
+}
+*/
+.box {
+    background: #122b44;
+    border: 1px solid rgba(0,191,255,0.25);
+    padding: 18px 20px;
+    border-radius: 12px;
+    margin: 0 auto 14px auto;
+    max-width: 500px;
+    text-align: left;
+}
+
+.info-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+.info-label {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: 80px;
+}
+.info-value {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* LOW STOCK ALERT */
+.low-stock-alert {
+    display: none;
+    background: rgba(239,71,111,0.15);
+    border: 1px solid rgba(239,71,111,0.6);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 0 auto 14px auto;
+    max-width: 500px;
+    text-align: left;
+    color: #ff6b8a;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.low-stock-alert.visible { display: block; }
+.low-stock-alert .alert-icon { font-size: 18px; margin-right: 8px; }
+
+/* QUANTITY ADJUSTMENT (existing med) */
+.adjust-box {
+    display: none;
+    background: #0d2236;
+    border: 1px solid rgba(0,191,255,0.3);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 0 auto 14px auto;
+    max-width: 500px;
+    text-align: left;
+}
+.adjust-box h3 {
+    font-size: 14px;
+    color: #00bfff;
+    margin: 0 0 14px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.adjust-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.adjust-row label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: 110px;
+}
+
+/* ADD NEW MED (new med) */
+.add-box {
+    display: none;
+    background: #0d2236;
+    border: 1px solid rgba(0,191,255,0.3);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 0 auto 14px auto;
+    max-width: 500px;
+    text-align: left;
+}
+.add-box h3 {
+    font-size: 14px;
+    color: #00bfff;
+    margin: 0 0 14px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+input[type="text"],
+input[type="number"] {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-size: 14px;
+    width: 100%;
+    margin-bottom: 10px;
+    outline: none;
+}
+input::placeholder { color: rgba(255,255,255,0.3); }
+input:focus { border-color: #00bfff; box-shadow: 0 0 10px rgba(0,191,255,0.2); }
+
+.field-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+button {
+    padding: 10px 20px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #0055cc, #00bfff);
+    color: white;
+}
+.btn-primary:hover { filter: brightness(1.1); }
+
+.btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.14); }
+
+.btn-danger {
+    background: linear-gradient(90deg, #EF476F, #ff8fa3);
+    color: white;
+}
+.btn-danger:hover { filter: brightness(1.1); }
+
+.btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.unit-tag {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    margin-left: 4px;
+}
+</style>
+</head>
+
+<body>
+
+<a href="javascript:history.back()" class="back-btn">← Back to Medical Page</a>
+
+<h1> Medication Scanner</h1>
+<div class="subtitle">Smart Medical Inventory System</div>
+
+<div id="scanner"></div>
+
+<!-- Info display 💊-->
+<div class="box" id="infoBox">
+    <div class="info-row">
+        <span class="info-label">Barcode</span>
+        <span class="info-value" id="barcode">---</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Medication</span>
+        <span class="info-value" id="medName">---</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Dosage</span>
+        <span class="info-value" id="dosage">---</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Remaining</span>
+        <span class="info-value" id="remaining">---</span>
+    </div>
+    <div style="margin-top:12px;">
+        <button class="btn-secondary" onclick="resetScanner()"> Scan Another Medication</button>
+    </div>
+</div>
+
+<!-- Low stock alert 🔄-->
+<div class="low-stock-alert" id="lowStockAlert">
+    <span class="alert-icon">🚨</span>
+    <span id="lowStockMsg">Low stock warning!</span>
+</div>
+
+<!-- Existing med: adjust quantity -->
+<div class="adjust-box" id="adjustBox">
+    <h3>Update Quantity</h3>
+    <div class="adjust-row">
+        <label>Remove Amount</label>
+        <input type="number" id="removeAmt" min="1" placeholder="e.g. 5" style="width:120px; margin:0;">
+        <span class="unit-tag" id="unitTagAdjust">units</span>
+    </div>
+    <div class="btn-row">
+        <button class="btn-danger" onclick="removeQuantity()">Remove & Save</button>
+    </div>
+</div>
+
+<!-- New med: add form -->
+<div class="add-box" id="addBox">
+    <h3>➕ New Medication</h3>
+    <div class="field-label">Barcode</div>
+    <input type="text" id="newBarcode" placeholder="Barcode Number">
+    <div class="field-label">Medication Name</div>
+    <input type="text" id="newName" placeholder="e.g. Ibuprofen 200mg">
+    <div class="field-label">Dosage</div>
+    <input type="text" id="newDose" placeholder="e.g. 200 mg">
+    <div class="field-label">Total Amount (pills or mL)</div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <input type="number" id="newQty" placeholder="e.g. 30" min="1" style="margin:0; flex:1;">
+        <select id="newUnit" style="padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.06); color:#fff; font-size:14px;">
+            <option value="pills">pills</option>
+            <option value="mL">mL</option>
+            <option value="capsules">capsules</option>
+            <option value="tablets">tablets</option>
+            <option value="doses">doses</option>
+        </select>
+    </div>
+    <div class="btn-row" style="margin-top:14px;">
+        <button class="btn-primary" onclick="saveMedication()"</button></button Save Medication</button>
+    </div>
+</div>
+<!--💾-->
+<script>
+let scanLocked = false;
+let database = JSON.parse(localStorage.getItem("medDB")) || {};
+let currentCode = null;
+
+function saveDatabase() {
+    localStorage.setItem("medDB", JSON.stringify(database));
+}
+
+Quagga.init({
+    inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: document.querySelector('#scanner'),
+        constraints: { facingMode: "environment" }
+    },
+    decoder: {
+        readers: ["ean_reader", "upc_reader", "code_128_reader"]
+    }
+}, function (err) {
+    if (err) return console.error(err);
+    Quagga.start();
+});
+
+let lastCode = "";
+
+Quagga.onDetected(function (data) {
+    if (scanLocked) return;
+    let code = data.codeResult.code;
+    if (code.length === 13 && code.startsWith("0")) code = code.substring(1);
+    if (code === lastCode) return;
+    lastCode = code;
+    handleScan(code);
+});
+
+function handleScan(code) {
+    currentCode = code;
+    document.getElementById("barcode").textContent = code;
+    document.getElementById("lowStockAlert").classList.remove("visible");
+
+    if (database[code]) {
+        scanLocked = true;
+        const med = database[code];
+        document.getElementById("medName").textContent = med.name;
+        document.getElementById("dosage").textContent = med.dosage;
+        document.getElementById("remaining").textContent = med.quantity + " " + (med.unit || "units");
+        document.getElementById("addBox").style.display = "none";
+
+        // Show adjust box
+        document.getElementById("unitTagAdjust").textContent = med.unit || "units";
+        document.getElementById("adjustBox").style.display = "block";
+
+        // Check low stock
+        checkLowStock(med);
+    } else {
+        document.getElementById("medName").textContent = "Not Found — Add New";
+        document.getElementById("dosage").textContent = "---";
+        document.getElementById("remaining").textContent = "---";
+        document.getElementById("adjustBox").style.display = "none";
+
+        document.getElementById("newBarcode").value = code;
+        document.getElementById("addBox").style.display = "block";
+    }
+}
+
+function checkLowStock(med) {
+    const alertEl = document.getElementById("lowStockAlert");
+    const msgEl   = document.getElementById("lowStockMsg");
+    if (med.quantity !== undefined && med.quantity < 5) {
+        msgEl.textContent = `⚠ Low stock: only ${med.quantity} ${med.unit || "units"} of ${med.name} remaining! Please restock soon.`;
+        alertEl.classList.add("visible");
+    } else {
+        alertEl.classList.remove("visible");
+    }
+}
+
+function removeQuantity() {
+    if (!currentCode || !database[currentCode]) return;
+    const removeAmt = parseInt(document.getElementById("removeAmt").value);
+    if (!removeAmt || removeAmt < 1) { alert("Please enter a valid amount to remove."); return; }
+
+    const med = database[currentCode];
+    if (removeAmt > med.quantity) {
+        alert(`Cannot remove ${removeAmt} — only ${med.quantity} ${med.unit || "units"} remaining.`);
+        return;
+    }
+
+    med.quantity -= removeAmt;
+    saveDatabase();
+
+    document.getElementById("remaining").textContent = med.quantity + " " + (med.unit || "units");
+    document.getElementById("removeAmt").value = "";
+
+    checkLowStock(med);
+
+    if (med.quantity === 0) {
+        alert(`${med.name} is now fully depleted!`);
+    } else {
+        alert(`Removed ${removeAmt} ${med.unit || "units"}. ${med.quantity} remaining.`);
+    }
+}
+
+function saveMedication() {
+    const code = document.getElementById("newBarcode").value.trim();
+    const name = document.getElementById("newName").value.trim();
+    const dose = document.getElementById("newDose").value.trim();
+    const qty  = parseInt(document.getElementById("newQty").value);
+    const unit = document.getElementById("newUnit").value;
+
+    if (!code || !name || !dose || !qty || qty < 1) {
+        alert("Please fill in all fields including a valid quantity.");
+        return;
+    }
+
+    database[code] = { name, dosage: dose, quantity: qty, unit };
+    saveDatabase();
+
+    document.getElementById("medName").textContent = name;
+    document.getElementById("dosage").textContent = dose;
+    document.getElementById("remaining").textContent = qty + " " + unit;
+    document.getElementById("addBox").style.display = "none";
+
+    // Show adjust box for the newly added med
+    document.getElementById("unitTagAdjust").textContent = unit;
+    document.getElementById("adjustBox").style.display = "block";
+
+    scanLocked = true;
+    checkLowStock(database[code]);
+    alert("Medication saved successfully!");
+}
+
+function resetScanner() {
+    scanLocked = false;
+    lastCode = "";
+    currentCode = null;
+    document.getElementById("barcode").textContent = "---";
+    document.getElementById("medName").textContent = "---";
+    document.getElementById("dosage").textContent = "---";
+    document.getElementById("remaining").textContent = "---";
+    document.getElementById("addBox").style.display = "none";
+    document.getElementById("adjustBox").style.display = "none";
+    document.getElementById("lowStockAlert").classList.remove("visible");
+    document.getElementById("removeAmt").value = "";
+}
+</script>
+
+</body>
+</html>
